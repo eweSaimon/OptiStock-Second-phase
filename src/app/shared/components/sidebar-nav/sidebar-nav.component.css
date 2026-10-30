@@ -1,0 +1,3 @@
+/* Estilos compartidos (sidebar, nav-link, etc.) viven en src/styles.css
+   para que Dashboard, Productos, Inventario, etc. los reutilicen sin
+   duplicar CSS por componente. Este archivo queda intencionalmente vacío. */
