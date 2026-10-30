@@ -1,0 +1,84 @@
+<header class="topbar">
+  <div>
+    <h1 class="topbar__title">Dashboard</h1>
+    <p class="topbar__subtitle">Resumen general del inventario de la papelería</p>
+  </div>
+</header>
+
+<main class="content">
+  @if (cargando()) {
+    <p class="empty-state">Cargando información del inventario…</p>
+  } @else if (hayError()) {
+    <div class="error-box">
+      <p>{{ hayError() }}</p>
+      <button type="button" class="btn btn--ghost" (click)="reintentar()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="stats-grid">
+      <app-stat-card label="Productos registrados" [value]="productosService.totalProductos()" />
+      <app-stat-card label="Stock disponible" [value]="productosService.stockTotal()" />
+      <app-stat-card label="Productos con stock bajo" [value]="alertasCount()" variant="warning" />
+      <app-stat-card label="Alertas activas" [value]="alertasCount()" variant="danger" />
+    </div>
+
+    <div class="panel-grid">
+      <article class="panel">
+        <header class="panel__header">
+          <h2>Productos con stock bajo</h2>
+          <p>Requieren reposición pronto</p>
+        </header>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col">Stock actual</th>
+                <th scope="col">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (producto of productosStockBajo(); track producto.id) {
+                <tr>
+                  <td>{{ producto.nombre }}</td>
+                  <td class="cell-numeric">{{ producto.cantidad }}</td>
+                  <td><app-estado-pill [estado]="calcularEstado(producto)" /></td>
+                </tr>
+              } @empty {
+                <tr class="empty-row"><td colspan="3">No hay productos con stock bajo.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel">
+        <header class="panel__header">
+          <h2>Últimos movimientos</h2>
+          <p>Entradas y salidas recientes</p>
+        </header>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Producto</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (movimiento of ultimosMovimientos(); track movimiento.id) {
+                <tr>
+                  <td>{{ formatearFecha(movimiento.fecha) }}</td>
+                  <td>{{ movimiento.producto }}</td>
+                  <td>{{ movimiento.tipo }}</td>
+                  <td class="cell-numeric">{{ movimiento.cantidad }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+  }
+</main>
