@@ -1,77 +1,70 @@
-# OptiStock — Segunda entrega (Angular)
+# OptiStock
 
-Evolución Front-End de OptiStock (plataforma de gestión de inventario de una
-papelería) implementada en **Angular 18** (standalone components, Signals,
-`@if`/`@for`, Angular Router, `HttpClient`), para la Unidad 2 de Desarrollo Web.
+Aplicación web para gestionar el inventario de una papelería. Este es el proyecto de Desarrollo Web de Ingeniería Informática, hecho por Simón Marulanda.
 
-## Requisitos previos
+En la primera entrega lo hice con HTML, CSS y JavaScript. En esta segunda entrega lo pasé a Angular 18 y la información ahora se carga desde archivos JSON.
 
-- Node.js 18 o superior (recomendado 20 LTS)
-- npm 9+
+## Qué hace
 
-## Instalación y ejecución
+- **Dashboard:** muestra el total de productos, el stock disponible, los productos con stock bajo y los últimos movimientos.
+- **Productos:** formulario para registrar un producto nuevo (con validaciones) y lista de los productos registrados. Al hacer clic en una fila se muestra un detalle del producto.
+- **Inventario:** tabla con el estado de cada producto: Disponible, Stock bajo o Agotado.
+- **Movimientos:** historial de entradas y salidas.
+- **Alertas:** productos cuya cantidad es menor o igual al stock mínimo.
+
+## Cómo ejecutarlo
+
+Necesita Node.js 18 o superior.
 
 ```bash
-cd optistock-angular
 npm install
 npm start
 ```
 
-Esto levanta el servidor de desarrollo en `http://localhost:4200/`. Angular
-redirige automáticamente `/` hacia `/dashboard`.
+Luego se abre `http://localhost:4200` en el navegador.
 
-## Build de producción
+Para generar la versión de producción:
 
 ```bash
 npm run build
 ```
 
-El resultado queda en `dist/optistock-angular/browser/`.
-
-## Estructura del proyecto
+## Estructura
 
 ```
 src/app/
-├── core/
-│   ├── models/          Producto, Movimiento (interfaces tipadas)
-│   └── services/        ProductosService, MovimientosService (HttpClient + Signals)
-├── shared/
-│   ├── components/      StatCard, EstadoPill, SidebarNav (reutilizables)
-│   └── utils/           inventario.utils.ts (reglas de negocio puras)
-├── features/
-│   ├── dashboard/
-│   ├── productos/       contenedor → producto-list → producto-item
-│   ├── inventario/
-│   ├── movimientos/
-│   └── alertas/
-├── app.routes.ts        5 rutas reales, lazy-loaded
-└── app.component.ts     shell: sidebar + <router-outlet>
-
+  core/
+    models/       interfaces Producto y Movimiento
+    services/     ProductosService y MovimientosService
+  shared/
+    components/   tarjeta de estadística, etiqueta de estado y menú lateral
+    utils/        funciones para calcular el estado y dar formato
+  features/
+    dashboard/
+    productos/    productos, producto-list y producto-item
+    inventario/
+    movimientos/
+    alertas/
+  app.routes.ts
+  app.config.ts
+  app.component.ts
 public/data/
-├── productos.json
-└── movimientos.json
+  productos.json
+  movimientos.json
 ```
 
-## Notas importantes
+## Cómo funcionan los datos
 
-- **Sin persistencia real:** los datos se cargan desde los JSON en
-  `public/data/` vía `HttpClient` y viven en memoria (Signals) mientras la
-  pestaña está abierta. Registrar un producto no modifica el archivo JSON.
-- **Simulación de carga/error:** cada servicio simula ~700ms de latencia y
-  un 15% de probabilidad de error al cargar, únicamente para poder
-  demostrar los tres estados (`loading`, `error`, datos) que pide la
-  rúbrica. Está documentado como tal en el código (`productos.service.ts`,
-  `movimientos.service.ts`). Si un profesor recarga varias veces y le "toca"
-  el error simulado, el botón "Reintentar" vuelve a pedir los datos.
-- **Sin backend todavía:** conforme al alcance de esta entrega.
+Los datos están en `public/data`. Los servicios los piden con `HttpClient` y los guardan en Signals (los datos, si está cargando y si hubo error). Los componentes solo leen esas señales, no saben de dónde vienen los datos.
 
-## Errores típicos a tener en cuenta
+Cuando se registra un producto se agrega a la lista en memoria y se crea un movimiento de entrada. Como todavía no hay backend, no se guarda en el JSON y al recargar la página se pierde.
 
-- **Rutas en blanco al recargar con `ng serve`:** no debería ocurrir (el
-  dev-server de Angular sí maneja el fallback SPA). Si despliegas el build
-  de producción en un hosting estático simple, configura el *rewrite* de
-  todas las rutas hacia `index.html` o verás 404 en `/productos`, etc.
-- **CORS:** no aplica en esta entrega porque los datos son JSON locales
-  servidos por el mismo origen (`public/data/`), no una API externa.
-- **`any` implícito:** el proyecto completo está tipado (modelos `Producto`
-  y `Movimiento`); evita reintroducir `any` al extender el código.
+## Simulación de carga y error
+
+Para poder mostrar los estados de carga y de error, los servicios esperan 700 ms antes de responder y fallan al azar el 15 % de las veces. Es solo para la demostración. Si sale el mensaje de error, el botón "Reintentar" vuelve a pedir los datos.
+
+## Pendiente
+
+- Backend y base de datos.
+- Guardar los cambios de verdad.
+- Editar y eliminar productos.
