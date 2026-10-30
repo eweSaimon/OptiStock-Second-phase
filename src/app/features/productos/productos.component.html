@@ -1,0 +1,87 @@
+<header class="topbar">
+  <div>
+    <h1 class="topbar__title">Productos</h1>
+    <p class="topbar__subtitle">Registra y consulta los productos de la papelería</p>
+  </div>
+</header>
+
+<main class="content">
+  <article class="panel panel--form">
+    <header class="panel__header">
+      <h2>Registrar producto</h2>
+      <p>Los campos marcados con * son obligatorios</p>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="registrar()" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="input-nombre">Nombre del producto *</label>
+          <input id="input-nombre" type="text" formControlName="nombre" placeholder="Ej: Cuaderno universitario"
+                 [class.is-invalid]="form.controls.nombre.invalid && form.controls.nombre.touched">
+        </div>
+
+        <div class="field">
+          <label for="input-categoria">Categoría *</label>
+          <select id="input-categoria" formControlName="categoria"
+                  [class.is-invalid]="form.controls.categoria.invalid && form.controls.categoria.touched">
+            <option value="" disabled>Selecciona una categoría</option>
+            @for (categoria of categorias; track categoria) {
+              <option [value]="categoria">{{ categoria }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="input-precio">Precio (COP) *</label>
+          <input id="input-precio" type="number" formControlName="precio" min="0" step="50"
+                 [class.is-invalid]="form.controls.precio.invalid && form.controls.precio.touched">
+        </div>
+
+        <div class="field">
+          <label for="input-cantidad">Cantidad inicial *</label>
+          <input id="input-cantidad" type="number" formControlName="cantidad" min="0" step="1"
+                 [class.is-invalid]="form.controls.cantidad.invalid && form.controls.cantidad.touched">
+        </div>
+
+        <div class="field">
+          <label for="input-stock-minimo">Stock mínimo *</label>
+          <input id="input-stock-minimo" type="number" formControlName="stockMinimo" min="0" step="1"
+                 [class.is-invalid]="form.controls.stockMinimo.invalid && form.controls.stockMinimo.touched">
+        </div>
+      </div>
+
+      @if (mensaje(); as m) {
+        <p class="form-message" [class.is-error]="m.tipo === 'error'" [class.is-success]="m.tipo === 'success'" role="alert">
+          {{ m.texto }}
+        </p>
+      }
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary">Agregar producto</button>
+        <button type="button" class="btn btn--ghost" (click)="form.reset({ nombre: '', categoria: '', precio: 0, cantidad: 0, stockMinimo: 0 }); mensaje.set(null)">
+          Limpiar campos
+        </button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel">
+    <header class="panel__header">
+      <h2>Catálogo de productos</h2>
+      <p>Todos los productos registrados en OptiStock</p>
+    </header>
+
+    @if (productosService.loading()) {
+      <p class="empty-state">Cargando productos…</p>
+    } @else if (productosService.error()) {
+      <div class="error-box">
+        <p>{{ productosService.error() }}</p>
+        <button type="button" class="btn btn--ghost" (click)="productosService.cargar()">Reintentar</button>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <app-producto-list [productos]="productosService.productos()" />
+      </div>
+    }
+  </article>
+</main>
