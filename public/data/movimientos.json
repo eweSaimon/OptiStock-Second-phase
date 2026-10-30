@@ -1,0 +1,10 @@
+[
+  { "id": 1, "fecha": "2026-09-10", "producto": "Cuaderno universitario", "tipo": "Entrada", "cantidad": 30 },
+  { "id": 2, "fecha": "2026-09-11", "producto": "Resma carta", "tipo": "Salida", "cantidad": 12 },
+  { "id": 3, "fecha": "2026-09-12", "producto": "Lapicero azul", "tipo": "Entrada", "cantidad": 50 },
+  { "id": 4, "fecha": "2026-09-13", "producto": "Marcador permanente", "tipo": "Salida", "cantidad": 8 },
+  { "id": 5, "fecha": "2026-09-15", "producto": "Cartulina blanca", "tipo": "Salida", "cantidad": 10 },
+  { "id": 6, "fecha": "2026-09-16", "producto": "Borrador", "tipo": "Salida", "cantidad": 6 },
+  { "id": 7, "fecha": "2026-09-17", "producto": "Regla 30 cm", "tipo": "Entrada", "cantidad": 15 },
+  { "id": 8, "fecha": "2026-09-18", "producto": "Corrector", "tipo": "Salida", "cantidad": 4 }
+]
