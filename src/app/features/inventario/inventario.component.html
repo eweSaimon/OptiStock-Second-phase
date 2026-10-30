@@ -1,0 +1,53 @@
+<header class="topbar">
+  <div>
+    <h1 class="topbar__title">Inventario</h1>
+    <p class="topbar__subtitle">Estado actual del stock de cada producto</p>
+  </div>
+</header>
+
+<main class="content">
+  <article class="panel">
+    <header class="panel__header">
+      <h2>Inventario general</h2>
+      <p>Estado actual de cada producto según su stock mínimo</p>
+    </header>
+
+    @if (productosService.loading()) {
+      <p class="empty-state">Cargando inventario…</p>
+    } @else if (productosService.error()) {
+      <div class="error-box">
+        <p>{{ productosService.error() }}</p>
+        <button type="button" class="btn btn--ghost" (click)="productosService.cargar()">Reintentar</button>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Producto</th>
+              <th scope="col">Categoría</th>
+              <th scope="col">Precio</th>
+              <th scope="col">Stock</th>
+              <th scope="col">Stock mínimo</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (producto of productosService.productos(); track producto.id) {
+              <tr>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.categoria }}</td>
+                <td>{{ formatearMoneda(producto.precio) }}</td>
+                <td class="cell-numeric">{{ producto.cantidad }}</td>
+                <td class="cell-numeric">{{ producto.stockMinimo }}</td>
+                <td><app-estado-pill [estado]="calcularEstado(producto)" /></td>
+              </tr>
+            } @empty {
+              <tr class="empty-row"><td colspan="6">No hay productos registrados.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </article>
+</main>

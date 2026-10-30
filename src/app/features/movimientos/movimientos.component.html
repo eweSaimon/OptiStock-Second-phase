@@ -1,0 +1,49 @@
+<header class="topbar">
+  <div>
+    <h1 class="topbar__title">Movimientos</h1>
+    <p class="topbar__subtitle">Historial de entradas y salidas</p>
+  </div>
+</header>
+
+<main class="content">
+  <article class="panel">
+    <header class="panel__header">
+      <h2>Historial de movimientos</h2>
+      <p>Entradas y salidas registradas en el inventario</p>
+    </header>
+
+    @if (movimientosService.loading()) {
+      <p class="empty-state">Cargando movimientos…</p>
+    } @else if (movimientosService.error()) {
+      <div class="error-box">
+        <p>{{ movimientosService.error() }}</p>
+        <button type="button" class="btn btn--ghost" (click)="movimientosService.cargar()">Reintentar</button>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Producto</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (movimiento of movimientosOrdenados(); track movimiento.id) {
+              <tr>
+                <td>{{ formatearFecha(movimiento.fecha) }}</td>
+                <td>{{ movimiento.producto }}</td>
+                <td>{{ movimiento.tipo }}</td>
+                <td class="cell-numeric">{{ movimiento.cantidad }}</td>
+              </tr>
+            } @empty {
+              <tr class="empty-row"><td colspan="4">No hay movimientos registrados.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </article>
+</main>

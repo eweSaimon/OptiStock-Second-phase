@@ -1,0 +1,53 @@
+<header class="topbar">
+  <div>
+    <h1 class="topbar__title">Alertas</h1>
+    <p class="topbar__subtitle">Productos que necesitan reposición</p>
+  </div>
+</header>
+
+<main class="content">
+  <article class="panel">
+    <header class="panel__header">
+      <h2>Alertas de inventario</h2>
+      <p>Productos que alcanzaron o superaron su stock mínimo</p>
+    </header>
+
+    @if (productosService.loading()) {
+      <p class="empty-state">Cargando alertas…</p>
+    } @else if (productosService.error()) {
+      <div class="error-box">
+        <p>{{ productosService.error() }}</p>
+        <button type="button" class="btn btn--ghost" (click)="productosService.cargar()">Reintentar</button>
+      </div>
+    } @else if (productosEnAlerta().length === 0) {
+      <p class="empty-state">No hay alertas activas en este momento.</p>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Producto</th>
+              <th scope="col">Stock actual</th>
+              <th scope="col">Stock mínimo</th>
+              <th scope="col">Nivel de alerta</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (producto of productosEnAlerta(); track producto.id) {
+              <tr>
+                <td>{{ producto.nombre }}</td>
+                <td class="cell-numeric">{{ producto.cantidad }}</td>
+                <td class="cell-numeric">{{ producto.stockMinimo }}</td>
+                <td>
+                  <span class="pill" [class.pill--danger]="calcularNivelAlerta(producto) === 'Crítico'" [class.pill--warning]="calcularNivelAlerta(producto) === 'Advertencia'">
+                    {{ calcularNivelAlerta(producto) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </article>
+</main>
