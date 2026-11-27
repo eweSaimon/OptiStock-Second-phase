@@ -28,7 +28,7 @@ function withDatabase(work) {
 
 async function writeDatabase(data) {
   const temporaryFile = DB_FILE + '.tmp';
-  await fs.writeFile(temporaryFile, JSON.stringify(data, null, 2) + '\\n', 'utf8');
+  await fs.writeFile(temporaryFile, JSON.stringify(data, null, 2) + '\n', 'utf8');
   await fs.rename(temporaryFile, DB_FILE);
 }
 
