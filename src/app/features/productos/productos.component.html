@@ -18,8 +18,10 @@
           <label for="input-nombre">Nombre del producto *</label>
           <input id="input-nombre" type="text" formControlName="nombre" placeholder="Ej: Cuaderno universitario"
                  [class.is-invalid]="form.controls.nombre.invalid && form.controls.nombre.touched">
+          @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+            <small class="field-error">Ingresa un nombre de al menos 2 caracteres.</small>
+          }
         </div>
-
         <div class="field">
           <label for="input-categoria">Categoría *</label>
           <select id="input-categoria" formControlName="categoria"
@@ -29,20 +31,20 @@
               <option [value]="categoria">{{ categoria }}</option>
             }
           </select>
+          @if (form.controls.categoria.invalid && form.controls.categoria.touched) {
+            <small class="field-error">Selecciona una categoría.</small>
+          }
         </div>
-
         <div class="field">
           <label for="input-precio">Precio (COP) *</label>
-          <input id="input-precio" type="number" formControlName="precio" min="0" step="50"
+          <input id="input-precio" type="number" formControlName="precio" min="1" step="50"
                  [class.is-invalid]="form.controls.precio.invalid && form.controls.precio.touched">
         </div>
-
         <div class="field">
           <label for="input-cantidad">Cantidad inicial *</label>
           <input id="input-cantidad" type="number" formControlName="cantidad" min="0" step="1"
                  [class.is-invalid]="form.controls.cantidad.invalid && form.controls.cantidad.touched">
         </div>
-
         <div class="field">
           <label for="input-stock-minimo">Stock mínimo *</label>
           <input id="input-stock-minimo" type="number" formControlName="stockMinimo" min="0" step="1"
@@ -55,10 +57,12 @@
           {{ m.texto }}
         </p>
       }
-
       <div class="form-actions">
-        <button type="submit" class="btn btn--primary">Agregar producto</button>
-        <button type="button" class="btn btn--ghost" (click)="form.reset({ nombre: '', categoria: '', precio: 0, cantidad: 0, stockMinimo: 0 }); mensaje.set(null)">
+        <button type="submit" class="btn btn--primary" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando…' : 'Agregar producto' }}
+        </button>
+        <button type="button" class="btn btn--ghost" [disabled]="guardando()"
+                (click)="form.reset({ nombre: '', categoria: '', precio: 0, cantidad: 0, stockMinimo: 0 }); mensaje.set(null)">
           Limpiar campos
         </button>
       </div>
@@ -68,9 +72,8 @@
   <article class="panel">
     <header class="panel__header">
       <h2>Catálogo de productos</h2>
-      <p>Todos los productos registrados en OptiStock</p>
+      <p>Productos registrados y recuperados desde la API de OptiStock</p>
     </header>
-
     @if (productosService.loading()) {
       <p class="empty-state">Cargando productos…</p>
     } @else if (productosService.error()) {
