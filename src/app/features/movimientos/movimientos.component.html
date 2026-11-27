@@ -1,17 +1,55 @@
 <header class="topbar">
   <div>
     <h1 class="topbar__title">Movimientos</h1>
-    <p class="topbar__subtitle">Historial de entradas y salidas</p>
+    <p class="topbar__subtitle">Registra entradas y salidas y consulta el historial</p>
   </div>
 </header>
 
 <main class="content">
+  <article class="panel panel--form">
+    <header class="panel__header">
+      <h2>Registrar movimiento</h2>
+      <p>Las entradas aumentan el stock y las salidas lo disminuyen.</p>
+    </header>
+    <form [formGroup]="form" (ngSubmit)="registrar()" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="mov-producto">Producto *</label>
+          <select id="mov-producto" formControlName="productoId">
+            <option [value]="0">Selecciona un producto</option>
+            @for (producto of productosService.productos(); track producto.id) {
+              <option [value]="producto.id">{{ producto.nombre }} (stock: {{ producto.cantidad }})</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label for="mov-tipo">Tipo de movimiento *</label>
+          <select id="mov-tipo" formControlName="tipo">
+            <option value="Entrada">Entrada</option>
+            <option value="Salida">Salida</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mov-cantidad">Cantidad *</label>
+          <input id="mov-cantidad" type="number" min="1" step="1" formControlName="cantidad">
+        </div>
+      </div>
+      @if (mensaje(); as m) {
+        <p class="form-message" [class.is-error]="m.tipo === 'error'" [class.is-success]="m.tipo === 'success'" role="alert">{{ m.texto }}</p>
+      }
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="guardando() || productosService.productos().length === 0">
+          {{ guardando() ? 'Registrando…' : 'Registrar movimiento' }}
+        </button>
+      </div>
+    </form>
+  </article>
+
   <article class="panel">
     <header class="panel__header">
       <h2>Historial de movimientos</h2>
-      <p>Entradas y salidas registradas en el inventario</p>
+      <p>Registros recuperados desde la API de OptiStock</p>
     </header>
-
     @if (movimientosService.loading()) {
       <p class="empty-state">Cargando movimientos…</p>
     } @else if (movimientosService.error()) {
@@ -23,19 +61,14 @@
       <div class="table-wrap">
         <table class="data-table">
           <thead>
-            <tr>
-              <th scope="col">Fecha</th>
-              <th scope="col">Producto</th>
-              <th scope="col">Tipo</th>
-              <th scope="col">Cantidad</th>
-            </tr>
+            <tr><th scope="col">Fecha</th><th scope="col">Producto</th><th scope="col">Tipo</th><th scope="col">Cantidad</th></tr>
           </thead>
           <tbody>
             @for (movimiento of movimientosOrdenados(); track movimiento.id) {
               <tr>
                 <td>{{ formatearFecha(movimiento.fecha) }}</td>
                 <td>{{ movimiento.producto }}</td>
-                <td>{{ movimiento.tipo }}</td>
+                <td><span class="pill" [class.pill--success]="movimiento.tipo === 'Entrada'" [class.pill--warning]="movimiento.tipo === 'Salida'">{{ movimiento.tipo }}</span></td>
                 <td class="cell-numeric">{{ movimiento.cantidad }}</td>
               </tr>
             } @empty {

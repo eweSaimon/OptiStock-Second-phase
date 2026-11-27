@@ -7,13 +7,6 @@ import { NuevoProducto } from '../../core/models/producto.model';
 
 const CATEGORIAS = ['Cuadernos', 'Escritura', 'Papel', 'Oficina', 'Arte y manualidades'] as const;
 
-/**
- * Contenedor de la sección Productos.
- * Responsabilidades: formulario de registro + validación, y delegar el
- * renderizado de la colección a <app-producto-list>. No manipula el DOM
- * directamente en ningún punto (a diferencia de la Unidad 1): todo pasa
- * por Signals y el motor de cambios de Angular.
- */
 @Component({
   selector: 'app-productos',
   standalone: true,
@@ -27,6 +20,7 @@ export class ProductosComponent {
   private readonly movimientosService = inject(MovimientosService);
 
   protected readonly categorias = CATEGORIAS;
+  protected readonly guardando = signal(false);
   protected readonly mensaje = signal<{ texto: string; tipo: 'success' | 'error' } | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
@@ -38,9 +32,7 @@ export class ProductosComponent {
   });
 
   constructor() {
-    if (this.productosService.productos().length === 0) {
-      this.productosService.cargar();
-    }
+    if (this.productosService.productos().length === 0) this.productosService.cargar();
   }
 
   protected registrar(): void {
@@ -51,16 +43,20 @@ export class ProductosComponent {
     }
 
     const valores = this.form.getRawValue() as NuevoProducto;
-    const producto = this.productosService.agregar(valores);
+    this.guardando.set(true);
+    this.mensaje.set(null);
 
-    this.movimientosService.registrar({
-      fecha: new Date().toISOString().slice(0, 10),
-      producto: producto.nombre,
-      tipo: 'Entrada',
-      cantidad: producto.cantidad
+    this.productosService.agregar(valores).subscribe({
+      next: (producto) => {
+        this.movimientosService.cargar();
+        this.mensaje.set({ texto: '"' + producto.nombre + '" se registró y quedó guardado correctamente.', tipo: 'success' });
+        this.form.reset({ nombre: '', categoria: '', precio: 0, cantidad: 0, stockMinimo: 0 });
+        this.guardando.set(false);
+      },
+      error: () => {
+        this.mensaje.set({ texto: this.productosService.error() || 'No fue posible registrar el producto.', tipo: 'error' });
+        this.guardando.set(false);
+      }
     });
-
-    this.mensaje.set({ texto: `"${producto.nombre}" se agregó correctamente al inventario.`, tipo: 'success' });
-    this.form.reset({ nombre: '', categoria: '', precio: 0, cantidad: 0, stockMinimo: 0 });
   }
 }

@@ -217,3 +217,7 @@ a { text-decoration: none; color: inherit; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .stat-card__value { font-size: 1.5rem; }
 }
+
+/* Mensajes de validación y estados de interacción del formulario. */
+.field-error { color: var(--color-danger); font-size: 0.78rem; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }

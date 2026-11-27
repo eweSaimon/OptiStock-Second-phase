@@ -1,70 +1,163 @@
 # OptiStock
 
-Aplicación web para gestionar el inventario de una papelería. Este es el proyecto de Desarrollo Web de Ingeniería Informática, hecho por Simón Marulanda.
+Sistema web para la gestión del inventario de una papelería. Proyecto académico de Desarrollo Web – Ingeniería Informática.
 
-En la primera entrega lo hice con HTML, CSS y JavaScript. En esta segunda entrega lo pasé a Angular 18 y la información ahora se carga desde archivos JSON.
+Esta versión consolida el Front-End desarrollado en Angular 18 con una API REST en Node.js + Express y persistencia local en un archivo JSON.
 
-## Qué hace
+## Funcionalidades
 
-- **Dashboard:** muestra el total de productos, el stock disponible, los productos con stock bajo y los últimos movimientos.
-- **Productos:** formulario para registrar un producto nuevo (con validaciones) y lista de los productos registrados. Al hacer clic en una fila se muestra un detalle del producto.
-- **Inventario:** tabla con el estado de cada producto: Disponible, Stock bajo o Agotado.
-- **Movimientos:** historial de entradas y salidas.
-- **Alertas:** productos cuya cantidad es menor o igual al stock mínimo.
+- **Dashboard:** indicadores de productos, unidades disponibles, alertas y movimientos recientes.
+- **Productos:** consulta y registro de productos con validación en Angular y en el servidor.
+- **Inventario:** consulta del stock, precio y estado de cada producto.
+- **Movimientos:** registro de entradas y salidas, con actualización automática de existencias.
+- **Alertas:** identificación de productos agotados o con stock igual o inferior al mínimo.
 
-## Cómo ejecutarlo
+## Arquitectura
 
-Necesita Node.js 18 o superior.
+```
+Usuario
+  ↓
+Angular 18 + TypeScript
+  ↓
+Services + HttpClient
+  ↓ HTTP / JSON
+Node.js + Express (API REST)
+  ↓
+backend/data/db.json
+```
+
+Los componentes Angular consumen los endpoints mediante servicios. Express valida los datos, aplica las reglas de inventario y conserva los cambios en `backend/data/db.json`.
+
+## Requisitos
+
+- Node.js 18 o superior.
+- npm.
+
+## Instalación y ejecución
+
+### 1. Instalar dependencias del Front-End
+
+Desde la raíz del repositorio:
 
 ```bash
 npm install
+```
+
+### 2. Instalar dependencias del Back-End
+
+```bash
+cd backend
+npm install
+```
+
+### 3. Iniciar el servidor
+
+Desde la carpeta `backend`:
+
+```bash
 npm start
 ```
 
-Luego se abre `http://localhost:4200` en el navegador.
+La API queda disponible en `http://localhost:3000`.
 
-Para generar la versión de producción:
+### 4. Iniciar Angular
+
+En otra terminal, desde la raíz del repositorio:
 
 ```bash
-npm run build
+npm start
 ```
 
-## Estructura
+La aplicación queda disponible en `http://localhost:4200`.
 
-```
-src/app/
-  core/
-    models/       interfaces Producto y Movimiento
-    services/     ProductosService y MovimientosService
-  shared/
-    components/   tarjeta de estadística, etiqueta de estado y menú lateral
-    utils/        funciones para calcular el estado y dar formato
-  features/
-    dashboard/
-    productos/    productos, producto-list y producto-item
-    inventario/
-    movimientos/
-    alertas/
-  app.routes.ts
-  app.config.ts
-  app.component.ts
-public/data/
-  productos.json
-  movimientos.json
+## API REST
+
+| Método | Endpoint | Propósito |
+|---|---|---|
+| GET | `/api/health` | Verificar disponibilidad del servidor. |
+| GET | `/api/productos` | Consultar productos. |
+| POST | `/api/productos` | Registrar un producto y su entrada inicial, si aplica. |
+| GET | `/api/movimientos` | Consultar el historial de movimientos. |
+| POST | `/api/movimientos` | Registrar una entrada o salida y actualizar existencias. |
+
+### Ejemplo: registrar producto
+
+```http
+POST /api/productos
+Content-Type: application/json
 ```
 
-## Cómo funcionan los datos
+```json
+{
+  "nombre": "Resaltador amarillo",
+  "categoria": "Escritura",
+  "precio": 2500,
+  "cantidad": 20,
+  "stockMinimo": 5
+}
+```
 
-Los datos están en `public/data`. Los servicios los piden con `HttpClient` y los guardan en Signals (los datos, si está cargando y si hubo error). Los componentes solo leen esas señales, no saben de dónde vienen los datos.
+### Ejemplo: registrar movimiento
 
-Cuando se registra un producto se agrega a la lista en memoria y se crea un movimiento de entrada. Como todavía no hay backend, no se guarda en el JSON y al recargar la página se pierde.
+```http
+POST /api/movimientos
+Content-Type: application/json
+```
 
-## Simulación de carga y error
+```json
+{
+  "productoId": 1,
+  "tipo": "Salida",
+  "cantidad": 2
+}
+```
 
-Para poder mostrar los estados de carga y de error, los servicios esperan 700 ms antes de responder y fallan al azar el 15 % de las veces. Es solo para la demostración. Si sale el mensaje de error, el botón "Reintentar" vuelve a pedir los datos.
+El servidor rechaza cantidades inválidas, productos inexistentes y salidas que superen las existencias disponibles. Las respuestas de error incluyen un mensaje y un código HTTP apropiado.
 
-## Pendiente
+## Persistencia
 
-- Backend y base de datos.
-- Guardar los cambios de verdad.
-- Editar y eliminar productos.
+Los productos y movimientos se conservan en `backend/data/db.json`. Los registros creados mediante POST se escriben en el archivo y se recuperan mediante GET, incluso después de reiniciar el servidor.
+
+Este mecanismo es una persistencia local apropiada para el alcance académico; no pretende reemplazar una base de datos de producción.
+
+## Pruebas manuales
+
+Con el servidor activo, se puede comprobar:
+
+```bash
+curl http://localhost:3000/api/health
+curl http://localhost:3000/api/productos
+curl http://localhost:3000/api/movimientos
+```
+
+Para verificar la integración desde el navegador, abre DevTools → Network y registra un producto o movimiento. Deben observarse las solicitudes POST y las respuestas JSON del servidor.
+
+## Estructura principal
+
+```
+backend/
+  data/db.json
+  package.json
+  server.js
+src/
+  app/
+    core/
+      models/
+      services/
+    features/
+      alertas/
+      dashboard/
+      inventario/
+      movimientos/
+      productos/
+    shared/
+  styles.css
+  main.ts
+package.json
+```
+
+## Alcance y limitaciones
+
+- La persistencia utiliza un archivo JSON local y está pensada para ejecución en un único entorno de demostración.
+- No incluye autenticación, sesiones ni despliegue en producción, ya que no son requisitos generales de la entrega.
+- No implementa operaciones de edición o eliminación de productos.
